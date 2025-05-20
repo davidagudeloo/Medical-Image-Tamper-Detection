@@ -1,0 +1,139 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{url}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\begin{document}
+
+\title{Detección de Deepfake en imágenes médicas\\}
+
+\author{\IEEEauthorblockN{Juan Sebastián Ortiz Tangarife}
+\IEEEauthorblockA{\textit{Ingeniería de sistemas} \\
+\textit{Universidad de Antioquia}\\
+Medellín, Colombia \\
+juans.ortiz@udea.edu.co}
+\and
+\IEEEauthorblockN{David Agudelo Ochoa}
+\IEEEauthorblockA{\textit{Ingeniería de sistemas} \\
+\textit{Universidad de Antioquia}\\
+Medellín, Colombia \\
+david.agudeloo@udea.edu.co}
+\and
+\IEEEauthorblockN{Jose Franco Arroyave Cardona}
+\IEEEauthorblockA{\textit{Ingeniería de sistemas} \\
+\textit{Universidad de Antioquia}\\
+Medellín, Colombia \\
+franco.arroyave@udea.edu.co}
+
+}
+
+\maketitle
+
+\section{Introducción}
+\subsection{Contexto del problema}
+
+En los últimos años, el desarrollo de redes generativas adversariales (GANs) y otras técnicas avanzadas de inteligencia artificial ha permitido la creación de deepfakes (imágenes, audios o videos manipulados de manera que simulan ser reales). En este contexto, el término "deepfake" se refiere a contenido generado artificialmente, a menudo con el objetivo de engañar o desinformar. Aunque estos avances han permitido mejoras en muchas áreas, también han planteado serios desafíos, especialmente en campos donde la precisión y la veracidad son críticas, como en el ámbito médico.
+
+En el campo de imágenes médicas, las tomografías computarizadas (CT), resonancias magnéticas (MRI) y otras imágenes diagnósticas son fundamentales para el diagnóstico y tratamiento de enfermedades. Las manipulaciones de estas imágenes a través de técnicas de deepfake pueden ser extremadamente peligrosas, ya que pueden alterar los diagnósticos médicos, llevando a decisiones incorrectas y perjudicando el bienestar de los pacientes. Por ejemplo, una imagen manipulada de una radiografía podría hacer que un tumor visible sea invisible, o que un área sana sea interpretada erróneamente como problemática.
+
+El objetivo principal de este proyecto es desarrollar una solución automatizada basada en Machine Learning para la detección de imágenes médicas manipuladas. Esto permitiría a los profesionales de la salud contar con una herramienta que los ayude a identificar si una imagen ha sido alterada de alguna manera, lo que contribuiría a preservar la confiabilidad de los diagnósticos médicos.
+
+La implementación de una solución de este tipo es crucial en un contexto donde la información médica es cada vez más digitalizada y accesible en plataformas online, lo que aumenta la probabilidad de que imágenes manipuladas circulen. La detección eficiente de estos deepfakes en imágenes médicas no solo ayudaría a garantizar diagnósticos correctos, sino también a mejorar la seguridad y la confianza en el uso de imágenes digitales para la toma de decisiones médicas.
+
+\subsection{Composición de la base de datos}
+
+La base de datos utilizada se llama Deepfakes: Medical Image Tamper Detection (CT-GAN). Este conjunto de datos fue creado para estudiar la manipulación de imágenes médicas mediante técnicas de aprendizaje profundo (deep learning), específicamente en escaneos 3D de tomografía computarizada (CT) de los pulmones\cite{uci2020deepfakes}.
+Se utilizaron redes generativas adversarias (GANs) para alterar los escaneos, ya sea insertando cáncer falso (lesiones falsas) o eliminando cáncer real, simulando un ataque malicioso. El objetivo del dataset es permitir el desarrollo y evaluación de técnicas de detección de imágenes médicas alteradas (deepfakes médicos).
+
+\paragraph{Contenido del conjunto de datos}
+
+\begin{itemize}
+    \item 100 estudios de tomografía computarizada (CT scans) de tórax.
+    \item Cada escaneo contiene múltiples cortes (slices) de 512x512 píxeles, formando un volumen 3D.
+    \item Los datos están en formato DICOM, el estándar médico para imágenes.
+\end{itemize}
+
+\paragraph{Clasificación de los escaneos}
+Cada volumen está etiquetado según el tipo de manipulación presente:
+
+\begin{itemize}
+    \item \textbf{True-Benign(TB)}: Zona sin cáncer, no manipulada.
+    \item \textbf{True-Malignant(TM)}: Zona con cáncer real, no manipulada.
+    \item \textbf{False-Benign(FB)}: Cáncer real que fue eliminado con deepfake (engañosamente parece sano).
+    \item \textbf{False-Malignant(FM)}: Se añadió un cáncer falso con deepfake (engañosamente parece enfermo).
+\end{itemize}
+
+\paragraph{Número de muestras}
+Cada muestra corresponde a una imagen médica individual en formato \texttt{.dcm} (DICOM). Las imágenes están organizadas por paciente, donde cada carpeta representa a un paciente y contiene múltiples cortes (slices) de su estudio médico. El número total de imágenes es el siguiente:
+
+\begin{itemize}
+    \item \textbf{Experiment 1 - Blind}: 17,457 imágenes
+    \item \textbf{Experiment 2 - Open}: 5,296 imágenes
+    \item \textbf{Total}: 22,753 imágenes
+\end{itemize}
+
+
+\paragraph{Anotaciones}
+Cada experimento incluye un archivo \texttt{CSV} con anotaciones que indican regiones alteradas dentro de las imágenes. Cada fila en estos archivos representa una anotación, es decir, una posible manipulación en una ubicación específica de una imagen.
+
+\begin{itemize}
+    \item \textbf{Experiment 1 - Blind}: 133 anotaciones
+    \item \textbf{Experiment 2 - Open}: 36 anotaciones
+    \item \textbf{Total}: 169 anotaciones
+\end{itemize}
+
+Las variables presentes en ambos archivos son:
+
+\begin{itemize}
+    \item \textbf{type}: Tipo de manipulación (por ejemplo, \texttt{FB}).
+    \item \textbf{uuid}: Identificador único del paciente.
+    \item \textbf{slice}: Número de corte de la imagen donde se encuentra la anotación.
+    \item \textbf{x}, \textbf{y}: Coordenadas dentro del corte donde se localiza la alteración.
+\end{itemize}
+
+
+\paragraph{Datos faltantes}
+Tras una revisión completa, no se encontraron datos faltantes en los datasets. 
+
+\paragraph{Codificación de variables}
+
+Las variables del conjunto de datos se clasifican como sigue:
+
+\begin{itemize}
+    \item \textbf{Variables categóricas}:
+        \begin{itemize}
+            \item \texttt{type}
+        \end{itemize}
+    \item \textbf{Variables numéricas}:
+        \begin{itemize}
+            \item \texttt{uuid}, \texttt{slice}, \texttt{x}, \texttt{y}
+        \end{itemize}
+\end{itemize}
+
+\subsection{Paradigma de aprendizaje}
+
+El problema se puede plantear con dos paradigmas distintos:
+
+
+\section{Estado del Arte}
+
+Los autores Yetiş y Çeçen se centraron en detectar si las imágenes médicas habían sido manipuladas~\cite{yetis2024}, es decir, si correspondían a un \textit{deepfake}, abordando el problema mediante un enfoque de clasificación binaria supervisada~\cite{yetis2024}. Aunque el conjunto de datos contiene múltiples instancias por tomografía, cada uno de los cortes fue tratado como una muestra completa e independiente. El problema se abordó utilizando distintas variantes de la familia de modelos YOLO (You Only Look Once), especializada en la detección de objetos en imágenes, y cuya aplicación ha demostrado ser relevante en escenarios relacionados con \textit{deepfakes} médicos.
+
+Para la validación de los resultados, los autores realizaron una partición del conjunto de datos en 80\% para entrenamiento y 20\% para prueba. No se menciona el uso de validación cruzada.
+
+El rendimiento de los modelos se evaluó mediante métricas estándar en tareas de detección de objetos: precisión (precision), recobrado (recall) y media de precisión promedio (mAP). Estas métricas se calculan en función de la Intersección sobre la Unión (IoU), que mide el grado de coincidencia entre las cajas predichas y las reales en la detección.
+
+Según el análisis de resultados, el modelo YOLOv5su fue el más eficaz para la detección de manipulaciones en imágenes médicas del tipo CT, alcanzando un recall de 0,997 y un mAP superior a 0,931, lo que demuestra su alto desempeño en esta tarea.
+
+\bibliographystyle{IEEEtran}
+\bibliography{referencias}
+
+
+\end{document}
