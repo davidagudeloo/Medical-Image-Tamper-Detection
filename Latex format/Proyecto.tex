@@ -119,7 +119,8 @@ Las variables del conjunto de datos se clasifican como sigue:
 
 \subsection{Paradigma de aprendizaje}
 
-El problema se puede plantear con dos paradigmas distintos:
+El problema de detección de deepfakes en imágenes médicas se aborda como una tarea de clasificación binaria supervisada. Cada imagen se etiqueta como alterada (es decir, manipulada mediante técnicas de deepfake) o no alterada (imagen original sin modificaciones). De esta manera, el objetivo del modelo es aprender a distinguir patrones que permitan identificar si una imagen ha sido manipulada o no.
+Dado que el objetivo no es identificar el tipo de manipulación ni su ubicación exacta, sino simplemente determinar si existe o no una alteración, este enfoque binario permite simplificar el problema y centrarse en detectar patrones globales de manipulación.
 
 
 \section{Estado del Arte}
