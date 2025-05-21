@@ -1,0 +1,30 @@
+name: Compilar LaTeX
+
+on:
+  push:
+    branches:
+      - main  # o tu rama principal
+
+jobs:
+  build_latex:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clonar el repositorio
+        uses: actions/checkout@v3
+
+      - name: Compilar LaTeX
+        uses: xu-cheng/latex-action@v2
+        with:
+          root_file: Informe/main.tex
+          output_directory: Informe
+
+      - name: Mover y renombrar el PDF
+        run: |
+          mv Informe/main.pdf Informe.pdf
+
+      - name: Subir Informe.pdf como artefacto
+        uses: actions/upload-artifact@v3
+        with:
+          name: Informe
+          path: Informe.pdf
