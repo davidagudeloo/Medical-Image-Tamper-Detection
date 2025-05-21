@@ -16,12 +16,12 @@ jobs:
       - name: Compilar LaTeX
         uses: xu-cheng/latex-action@v2
         with:
-          root_file: Informe/main.tex
+          root_file: Informe/Proyecto.tex
           output_directory: Informe
 
       - name: Mover y renombrar el PDF
         run: |
-          mv Informe/main.pdf Informe.pdf
+          mv Informe/Proyecto.pdf Informe.pdf
 
       - name: Subir Informe.pdf como artefacto
         uses: actions/upload-artifact@v4
