@@ -1,2 +1,4 @@
 /Codigos/Experiments*
-Codigos/*.npz
+/Codigos/*.npz
+/Codigos/labels_*.csv
+/Codigos/labels_final.csv
