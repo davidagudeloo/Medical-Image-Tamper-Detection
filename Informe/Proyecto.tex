@@ -8,6 +8,7 @@
 \usepackage{textcomp}
 \usepackage{xcolor}
 \usepackage{url}
+\usepackage{hyperref}
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \begin{document}
@@ -79,6 +80,14 @@ Cada muestra corresponde a una imagen médica individual en formato \texttt{.dcm
     \item \textbf{Total}: 22,753 imágenes
 \end{itemize}
 
+\paragraph{Explicación experimentos}
+La base de datos está dividida en dos experimentos: Experiment 1 - Blind y Experiment 2 - Open, estos se diferencian en el nivel de información disponible sobre las manipulaciones.
+
+\begin{itemize}
+\item \textbf{Experiment 1 - Blind:} En este experimento, las anotaciones de las regiones manipuladas no fueron utilizadas durante el entrenamiento. Este enfoque simula un escenario más realista, donde las manipulaciones son desconocidas de antemano, y se espera que el modelo aprenda a detectarlas sin depender de etiquetas precisas sobre la ubicación del deepfake.
+\item \textbf{Experiment 2 - Open:} En este caso, sí se proporcionaron anotaciones explícitas de las regiones manipuladas durante el entrenamiento. El modelo conocía durante el proceso de aprendizaje qué partes de las imágenes estaban alteradas. Este enfoque permite una supervisión más precisa, y se espera que los modelos logren un desempeño más alto al tener acceso directo a la "verdad" respecto a las alteraciones en cada imagen.
+\end{itemize}
+
 
 \paragraph{Anotaciones}
 Cada experimento incluye un archivo \texttt{CSV} con anotaciones que indican regiones alteradas dentro de las imágenes. Cada fila en estos archivos representa una anotación, es decir, una posible manipulación en una ubicación específica de una imagen.
@@ -95,7 +104,7 @@ Las variables presentes en ambos archivos son:
     \item \textbf{type}: Tipo de manipulación (por ejemplo, \texttt{FB}).
     \item \textbf{uuid}: Identificador único del paciente.
     \item \textbf{slice}: Número de corte de la imagen donde se encuentra la anotación.
-    \item \textbf{x}, \textbf{y}: Coordenadas dentro del corte donde se localiza la alteración.
+    \item \textbf{x}, \textbf{y}: Coordenadas dentro del corte donde se localiza la alteración. Esto brinda la posibilidad de abordar el problema como una tarea de localización de regiones alteradas, usando técnicas como detección de objetos o segmentación.
 \end{itemize}
 
 
@@ -122,18 +131,47 @@ Las variables del conjunto de datos se clasifican como sigue:
 El problema de detección de deepfakes en imágenes médicas se aborda como una tarea de clasificación binaria supervisada. Cada imagen se etiqueta como alterada (es decir, manipulada mediante técnicas de deepfake) o no alterada (imagen original sin modificaciones). De esta manera, el objetivo del modelo es aprender a distinguir patrones que permitan identificar si una imagen ha sido manipulada o no.
 Dado que el objetivo no es identificar el tipo de manipulación ni su ubicación exacta, sino simplemente determinar si existe o no una alteración, este enfoque binario permite simplificar el problema y centrarse en detectar patrones globales de manipulación.
 
+El conjunto de datos está desbalanceado, ya que hay muchas más imágenes manipuladas (FB, FM) que originales (TM, TB). Para reducir un poco ese desbalance, se trabajó principalmente sobre la clase TB, duplicando las muestras y generando cortes adicionales alrededor del corte original. Esto se hizo desplazando el valor del corte (slice) hacia adelante y hacia atrás, como si se tomaran imágenes vecinas dentro del mismo estudio. Así se logra aumentar la cantidad de ejemplos TB sin alterar su clase.
+
 
 \section{Estado del Arte}
 
-Los autores Yetiş y Çeçen se centraron en detectar si las imágenes médicas habían sido manipuladas~\cite{yetis2024}, es decir, si correspondían a un \textit{deepfake}, abordando el problema mediante un enfoque de clasificación binaria supervisada~\cite{yetis2024}. Aunque el conjunto de datos contiene múltiples instancias por tomografía, cada uno de los cortes fue tratado como una muestra completa e independiente. El problema se abordó utilizando distintas variantes de la familia de modelos YOLO (You Only Look Once), especializada en la detección de objetos en imágenes, y cuya aplicación ha demostrado ser relevante en escenarios relacionados con \textit{deepfakes} médicos.
+Los autores Yetiş y Çeçen se centraron en detectar si las imágenes médicas habían sido manipuladas~\cite{yetis2024}, es decir, si correspondían a un \textit{deepfake}, abordando el problema mediante un enfoque de clasificación binaria supervisada. Aunque el conjunto de datos contiene múltiples instancias por tomografía, cada uno de los cortes fue tratado como una muestra completa e independiente. El problema se abordó utilizando distintas variantes de la familia de modelos YOLO (You Only Look Once), especializada en la detección de objetos en imágenes, y cuya aplicación ha demostrado ser relevante en escenarios relacionados con \textit{deepfakes} médicos.
 
-De manera similar, Solaiyappan y Wen también trataron el problema de detección de deepfakes médicos como una tarea de clasificación binaria supervisada~\cite{solaiyappan2022}. En este caso, se exploraron tanto modelos convencionales como modelos de aprendizaje profundo. Entre las técnicas utilizadas se incluyeron clasificadores clásicos como SVM, Random Forest y árboles de decisión, así como redes convolucionales preentrenadas como ResNet, VGG y DenseNet, adaptadas posteriormente mediante fine-tuning. Al igual que en el trabajo anterior, cada corte 2D fue tratado de forma independiente, sin modelar la secuencia 3D completa.
+De manera similar, Solaiyappan y Wen también trataron el problema de detección de \textit{deepfakes} médicos como una tarea de clasificación binaria supervisada~\cite{solaiyappan2022}. En este caso, se exploraron tanto modelos convencionales como modelos de aprendizaje profundo. Entre las técnicas utilizadas se incluyeron clasificadores clásicos como SVM, Random Forest y árboles de decisión, así como redes convolucionales preentrenadas como ResNet, VGG y DenseNet, adaptadas posteriormente mediante \textit{fine-tuning}. Al igual que en el trabajo anterior, cada corte 2D fue tratado de forma independiente, sin modelar la secuencia 3D completa.
 
-Para la validación de los resultados, los autores Yetiş y Çeçen realizaron una partición del conjunto de datos en 80\% para entrenamiento y 20\% para prueba. No se menciona el uso de validación cruzada. Por su parte, Solaiyappan y Wen también emplearon una partición de los datos en entrenamiento y prueba, aunque no se especifica la proporción exacta ni el uso de técnicas de validación cruzada.
+Sharafudeen y Chandra~\cite{sharafudeen2022} propusieron una arquitectura basada en redes neuronales convolucionales tridimensionales (3D-CNN) para abordar el mismo problema, con la ventaja de preservar la información espacial y contextual del volumen completo de la tomografía. El modelo fue entrenado con un 80\% de los datos, validado con un 10\%, y evaluado con el 10\% restante. La métrica principal reportada fue la exactitud (\textit{accuracy}), alcanzando un desempeño cercano al 98\%.
 
-El rendimiento de los modelos del primer estudio~\cite{yetis2024} se evaluó mediante métricas estándar en tareas de detección de objetos: precisión (precision), recobrado (recall) y media de precisión promedio (mAP). Estas métricas se calculan en función de la Intersección sobre la Unión (IoU), que mide el grado de coincidencia entre las cajas predichas y las reales en la detección. En el segundo estudio~\cite{solaiyappan2022}, las métricas empleadas se centraron en la exactitud (accuracy), con resultados que mostraron valores casi perfectos en los mejores modelos de deep learning utilizados, aunque no se reportaron otras métricas como precisión o recall.
+Por su parte, Albahli y Nawaz~\cite{albahli2023} propusieron una arquitectura híbrida llamada MedNet, que combina capas convolucionales con un enfoque de red neuronal multicapa para la clasificación final. A diferencia de los trabajos anteriores, utilizaron validación cruzada como método de evaluación y reportaron múltiples métricas: AUC, F1-score, precisión y exactitud. Sus resultados reflejaron un rendimiento robusto, con valores de exactitud superiores al 99\%.
 
-Según el análisis de resultados, el modelo YOLOv5su fue el más eficaz para la detección de manipulaciones en imágenes médicas del tipo CT, alcanzando un recall de 0,997 y un mAP superior a 0,931, lo que demuestra su alto desempeño en esta tarea~\cite{yetis2024}. Por otro lado, en el trabajo de Solaiyappan y Wen, los modelos basados en redes profundas como ResNet50 y DenseNet121 lograron desempeños notables, con exactitudes cercanas al 100\%, lo que refuerza la efectividad de los enfoques de aprendizaje profundo en la detección de manipulaciones médicas~\cite{solaiyappan2022}.
+Para la validación de los resultados, los autores Yetiş y Çeçen realizaron una partición del conjunto de datos en 80\% para entrenamiento y 20\% para prueba. No se menciona el uso de validación cruzada. Por su parte, Solaiyappan y Wen también emplearon una partición de los datos en entrenamiento y prueba, aunque no se especifica la proporción exacta ni el uso de técnicas de validación cruzada. En los otros dos estudios, sí se especifican claramente las estrategias de validación.
+
+El rendimiento de los modelos del primer estudio~\cite{yetis2024} se evaluó mediante métricas estándar en tareas de detección de objetos: precisión (\textit{precision}), recobrado (\textit{recall}) y media de precisión promedio (\textit{mAP}). Estas métricas se calculan en función de la Intersección sobre la Unión (IoU), que mide el grado de coincidencia entre las cajas predichas y las reales en la detección. En el segundo y tercer estudio~\cite{solaiyappan2022, sharafudeen2022}, las métricas empleadas se centraron en la exactitud (\textit{accuracy}), con resultados que mostraron valores casi perfectos en los mejores modelos de \textit{deep learning} utilizados. En el último trabajo~\cite{albahli2023}, se utilizaron métricas como la AUC y el F1-score, lo que permitió una evaluación más completa delrendimiento de los modelos.
+
+Según el análisis de resultados, el modelo YOLOv5 su fue el más eficaz para la detección de manipulaciones en imágenes médicas del tipo CT, alcanzando un \textit{recall} de 0{,}997 y un \textit{mAP} superior a 0{,}931~\cite{yetis2024}. Por otro lado, en el trabajo de Solaiyappan y Wen, los modelos basados en redes profundas como ResNet50 y DenseNet121 lograron desempeños notables, con exactitudes cercanas al 100\%~\cite{solaiyappan2022}. De manera similar, los modelos propuestos por Sharafudeen y Chandra~\cite{sharafudeen2022} y por Albahli y Nawaz~\cite{albahli2023} demostraron una alta capacidad de generalización, con exactitudes mayores al 98\% y métricas adicionales que respaldan la solidez de sus enfoques.
+
+\begin{table}[ht]
+\centering
+\caption{Comparación de artículos sobre detección de deepfakes médicos}
+\begin{tabular}{|p{1.3cm}|p{1cm}|p{1cm}|p{1.2cm}|p{1cm}|p{1cm}|}
+\hline
+\textbf{Artículo} & \textbf{Modelo usado} & \textbf{Tipo de dato} & \textbf{Validación} & \textbf{Métricas} & \textbf{Accuracy $/$ mAP} \\
+\hline
+Yetiş y Çeçen (2024) & YOLOv5 & Cortes 2D independientes & 80/20 & mAP, Recall, Precision & mAP $>$ 0.931 \\
+\hline
+Solaiyappan y Wen (2022) & ResNet50, SVM & Cortes 2D & No especificada & Accuracy & $\approx$ 100\% \\
+\hline
+Sharafudeen y Chandra (2022) & 3D-CNN & Volumen 3D & 80/10/10 & Accuracy & $\approx$ 98\% \\
+\hline
+Albahli y Nawaz (2023) & MedNet híbrido & CT-GAN & Validación cruzada & AUC, F1, Accuracy & $>$ 99\% \\
+\hline
+\end{tabular}
+\label{tab:comparacion-articulos}
+\end{table}
+
+
+
+
 
 
 \bibliographystyle{IEEEtran}
