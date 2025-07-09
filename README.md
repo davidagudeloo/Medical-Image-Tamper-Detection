@@ -5,11 +5,13 @@ _Project Repository for Modelos y Simulaciones II_
 
 This project aims to detect tampered medical images (deepfakes) using Machine Learning techniques, with a special focus on CT (Computed Tomography) scans. The dataset used is **"Deepfakes: Medical Image Tamper Detection (CT-GAN)"**, which contains altered and original medical images, essential for preserving diagnostic integrity in healthcare environments.
 
-📄 This first phase includes a PDF document containing:
+📄 First phase includes a PDF document containing:
 - Theoretical framework.
 - State of the art with a review of specialized literature.
+
+⚙️ In the second phase, experiments related to the detection of manipulated medical images were conducted, which are located in the /Codigos folder in notebooks 01 to 05. The procedures and results were documented in the written report in PDF format.
   
-> ⚠️ **Note**: Code development and models will be included in the upcoming project phases.
+> ⚠️ **Note**: To reproduce notebooks 01 and 02, it is necessary to have the folder containing the CT scans. Therefore, these notebooks cannot be reproduced unless the missing files are added.
 
 ---
 
@@ -22,4 +24,9 @@ This project aims to detect tampered medical images (deepfakes) using Machine Le
 | Jose Franco Arroyave Cardona   | franco.arroyave@udea.edu.co   | 
 
 ---
+
+## Video
+https://youtu.be/w6TrRWU1qs0
+
+
 
